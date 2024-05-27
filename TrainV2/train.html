@@ -1,0 +1,42 @@
+<!--
+	Simulateur de trains
+	@author       : Étienne André
+	Created       : 2023/12/11
+	Last modified : 2024/05/22
+-->
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8">
+		<title>Simulateur de trains</title>
+		<link rel="stylesheet" href="css/train.css">
+	</head>
+
+	<body>
+		<h1>Simulateur de trains</h1>
+
+		<canvas id="simulateur" width="1050" height="600">
+			Simulateur ferroviaire (votre navigateur ne prend pas en charge canvas)
+		</canvas>
+
+		<div id="boutons">
+			<input type="image" id="bouton_foret" alt="Forêt" src="images/foret.png" >
+			<input type="image" id="bouton_eau" alt="Eau" src="images/eau.png" >
+			<input type="image" id="bouton_rail_horizontal" alt="Rail horizontal" src="images/rail-horizontal.png" >
+			<input type="image" id="bouton_rail_vertical" alt="Rail vertical" src="images/rail-vertical.png" >
+			<input type="image" id="bouton_rail_droite_vers_haut" alt="Rail allant de droite vers le haut" src="images/rail-droite-vers-haut.png" >
+			<input type="image" id="bouton_rail_haut_vers_droite" alt="Rail allant du haut vers la droite" src="images/rail-haut-vers-droite.png" >
+			<input type="image" id="bouton_rail_droite_vers_bas" alt="Rail allant de la droite vers le bas" src="images/rail-droite-vers-bas.png" >
+			<input type="image" id="bouton_rail_bas_vers_droite" alt="Rail allant du bas vers la droite" src="images/rail-bas-vers-droite.png" >
+
+			<input type="image" id="bouton_train_1" alt="Locomotive seule" src="images/locomotive.png" >
+			<input type="image" id="bouton_train_2" alt="Locomotive et 1 wagon" src="images/loco-1-wagon.png" >
+			<input type="image" id="bouton_train_4" alt="Locomotive et 3 wagons" src="images/loco-3-wagons.png" >
+			<input type="image" id="bouton_train_6" alt="Locomotive et 5 wagons" src="images/loco-5-wagons.png" >
+
+			<button type="button" id="bouton_pause">Pause</button>
+		</div>
+
+		<script src="js/train.js"></script>
+	</body>
+</html>

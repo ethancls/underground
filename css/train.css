@@ -1,0 +1,24 @@
+/************************************************************/
+/**
+ * Université Sorbonne Paris Nord, Programmation Web
+ * Auteurs                       : Étienne André
+ * Création                      : 2023/12/11
+ * Dernière modification         : 2024/05/21
+ */
+/************************************************************/
+
+h1 {
+	font-family	: monospace;
+	font-size	: 3em;
+}
+
+#boutons input[type=image]
+{
+	height: 32px;
+	border: solid black 2px;
+}
+#boutons input[type=image]:disabled
+{
+    opacity:0.5;
+	border: solid red 2px;
+}

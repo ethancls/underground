@@ -59,8 +59,6 @@ class Type_de_case {
 	}
 }
 
-
-
 /*------------------------------------------------------------*/
 // Images
 /*------------------------------------------------------------*/
@@ -102,22 +100,26 @@ IMAGE_RAIL_HAUT_VERS_DROITE.src = 'images/rail-haut-vers-droite.png';
 let pause = false;
 let locomotives = [];
 
-
 /************************************************************/
 /* Classes */
 /************************************************************/
 
 /*------------------------------------------------------------*/
-// Plateau
+// Plateau + direction
 /*------------------------------------------------------------*/
+
+const DIRECTION = {
+	DROITE: 'droite',
+	GAUCHE: 'gauche',
+	HAUT: 'haut',
+	BAS: 'bas'
+};
 
 class Plateau {
 	/* Constructeur d'un plateau vierge */
 	constructor() {
 		this.largeur = LARGEUR_PLATEAU;
 		this.hauteur = HAUTEUR_PLATEAU;
-
-		// NOTE: à compléter…
 
 		// État des cases du plateau
 		// NOTE: tableau de colonnes, chaque colonne étant elle-même un tableau de cases (beaucoup plus simple à gérer avec la syntaxe case[x][y] pour une coordonnée (x,y))
@@ -129,66 +131,11 @@ class Plateau {
 			}
 		}
 	}
-
-	// NOTE: à compléter…
-
 }
 
-// TODO : d'autres classes si besoin
-
-
-/************************************************************/
-// Méthodes
-/************************************************************/
-
-function image_of_case(type_de_case) {
-	switch (type_de_case) {
-		case Type_de_case.Foret: return IMAGE_FORET;
-		case Type_de_case.Eau: return IMAGE_EAU;
-		case Type_de_case.Rail_horizontal: return IMAGE_RAIL_HORIZONTAL;
-		case Type_de_case.Rail_vertical: return IMAGE_RAIL_VERTICAL;
-		case Type_de_case.Rail_droite_vers_haut: return IMAGE_RAIL_DROITE_VERS_HAUT;
-		case Type_de_case.Rail_haut_vers_droite: return IMAGE_RAIL_HAUT_VERS_DROITE;
-		case Type_de_case.Rail_droite_vers_bas: return IMAGE_RAIL_DROITE_VERS_BAS;
-		case Type_de_case.Rail_bas_vers_droite: return IMAGE_RAIL_BAS_VERS_DROITE;
-		case Type_de_case.Wagon: return IMAGE_WAGON;
-		case Type_de_case.Loco: return IMAGE_LOCO;
-
-
-	}
-}
-
-function dessine_case(contexte, plateau, x, y) {
-	const la_case = plateau.cases[x][y];
-
-	// NOTE: à améliorer
-
-	let image_a_afficher = image_of_case(la_case);
-	contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
-}
-
-function dessine_train(contexte, train, x, y) {
-	let image_a_afficher = image_of_case(train);
-	contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
-}
-
-function dessine_plateau(page, plateau) {
-	// Dessin du plateau avec paysages et rails
-	for (let x = 0; x < plateau.largeur; x++) {
-		for (let y = 0; y < plateau.hauteur; y++) {
-			dessine_case(page, plateau, x, y);
-		}
-	}
-
-	// NOTE: à compléter…
-}
-
-const DIRECTION = {
-	DROITE: 'droite',
-	GAUCHE: 'gauche',
-	HAUT: 'haut',
-	BAS: 'bas'
-};
+/*------------------------------------------------------------*/
+// Locomotive
+/*------------------------------------------------------------*/
 
 class Loco {
 	constructor(x, y, direction, longueur) {
@@ -236,7 +183,7 @@ class Loco {
 
 	avancerLoco(contexte, plateau) {
 		// Avance la locomotive
-		if(this.avancer(contexte, plateau, Type_de_case.Loco, this) === false) {
+		if (this.avancer(contexte, plateau, Type_de_case.Loco, this) === false) {
 			const index = locomotives.indexOf(this);
 			dessine_case(contexte, plateau, this.x, this.y);
 			for (let i = 0; i < this.longueur; i++) {
@@ -334,6 +281,50 @@ class Loco {
 	}
 }
 
+/************************************************************/
+// Fonctions
+/************************************************************/
+
+function image_of_case(type_de_case) {
+	switch (type_de_case) {
+		case Type_de_case.Foret: return IMAGE_FORET;
+		case Type_de_case.Eau: return IMAGE_EAU;
+		case Type_de_case.Rail_horizontal: return IMAGE_RAIL_HORIZONTAL;
+		case Type_de_case.Rail_vertical: return IMAGE_RAIL_VERTICAL;
+		case Type_de_case.Rail_droite_vers_haut: return IMAGE_RAIL_DROITE_VERS_HAUT;
+		case Type_de_case.Rail_haut_vers_droite: return IMAGE_RAIL_HAUT_VERS_DROITE;
+		case Type_de_case.Rail_droite_vers_bas: return IMAGE_RAIL_DROITE_VERS_BAS;
+		case Type_de_case.Rail_bas_vers_droite: return IMAGE_RAIL_BAS_VERS_DROITE;
+		case Type_de_case.Wagon: return IMAGE_WAGON;
+		case Type_de_case.Loco: return IMAGE_LOCO;
+
+
+	}
+}
+
+function dessine_case(contexte, plateau, x, y) {
+	const la_case = plateau.cases[x][y];
+
+	// NOTE: à améliorer
+
+	let image_a_afficher = image_of_case(la_case);
+	contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
+}
+
+function dessine_train(contexte, train, x, y) {
+	let image_a_afficher = image_of_case(train);
+	contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
+}
+
+function dessine_plateau(page, plateau) {
+	// Dessin du plateau avec paysages et rails
+	for (let x = 0; x < plateau.largeur; x++) {
+		for (let y = 0; y < plateau.hauteur; y++) {
+			dessine_case(page, plateau, x, y);
+		}
+	}
+}
+
 function gameLoop(contexte, plateau) {
 
 	if (!pause) {
@@ -405,7 +396,12 @@ function setupListeners(contexte, plateau) {
 					break;
 				case 'bouton_train_2':
 					for (let i = 0; i < 2; i++) {
-						if (plateau.cases[x - i][y] != Type_de_case.Rail_horizontal) {
+						if (x - i > 0) {
+							if (plateau.cases[x - i][y] != Type_de_case.Rail_horizontal) {
+								return;
+							}
+						}
+						else {
 							return;
 						}
 					}
@@ -417,8 +413,14 @@ function setupListeners(contexte, plateau) {
 					break;
 				case 'bouton_train_4':
 					for (let i = 0; i < 4; i++) {
-						if (plateau.cases[x - i][y] != Type_de_case.Rail_horizontal) {
+						if (x - i > 0) {
+							if (plateau.cases[x - i][y] != Type_de_case.Rail_horizontal) {
+								return;
+							}
+						}
+						else {
 							return;
+
 						}
 					}
 					dessine_train(contexte, Type_de_case.Loco, x, y);
@@ -429,7 +431,12 @@ function setupListeners(contexte, plateau) {
 					break;
 				case 'bouton_train_6':
 					for (let i = 0; i < 6; i++) {
-						if (plateau.cases[x - i][y] != Type_de_case.Rail_horizontal) {
+						if (x - i > 0) {
+							if (plateau.cases[x - i][y] != Type_de_case.Rail_horizontal) {
+								return;
+							}
+						}
+						else {
 							return;
 						}
 					}
@@ -477,6 +484,44 @@ function cree_plateau_initial(plateau) {
 	plateau.cases[11][5] = Type_de_case.Rail_haut_vers_droite;
 	plateau.cases[11][6] = Type_de_case.Rail_vertical;
 	plateau.cases[11][7] = Type_de_case.Rail_bas_vers_droite;
+
+	// Ciruit 2
+	plateau.cases[10][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[11][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[12][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[13][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[14][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[15][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[16][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[17][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[18][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[19][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[20][9] = Type_de_case.Rail_horizontal;
+	plateau.cases[21][9] = Type_de_case.Rail_droite_vers_haut;
+	plateau.cases[21][8] = Type_de_case.Rail_vertical;
+	plateau.cases[21][7] = Type_de_case.Rail_vertical;
+	plateau.cases[21][6] = Type_de_case.Rail_vertical;
+	plateau.cases[21][5] = Type_de_case.Rail_vertical;
+	plateau.cases[21][4] = Type_de_case.Rail_vertical;
+	plateau.cases[21][3] = Type_de_case.Rail_droite_vers_bas;
+	plateau.cases[10][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[11][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[12][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[13][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[14][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[15][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[16][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[17][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[18][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[19][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[20][3] = Type_de_case.Rail_horizontal;
+	plateau.cases[9][9] = Type_de_case.Rail_bas_vers_droite;
+	plateau.cases[9][8] = Type_de_case.Rail_vertical;
+	plateau.cases[9][7] = Type_de_case.Rail_vertical;
+	plateau.cases[9][6] = Type_de_case.Rail_vertical;
+	plateau.cases[9][5] = Type_de_case.Rail_vertical;
+	plateau.cases[9][4] = Type_de_case.Rail_vertical;
+	plateau.cases[9][3] = Type_de_case.Rail_haut_vers_droite;
 
 	// Segment isolé à gauche
 	plateau.cases[0][7] = Type_de_case.Rail_horizontal;
@@ -554,7 +599,6 @@ function cree_plateau_initial(plateau) {
 	plateau.cases[21][12] = Type_de_case.Eau;
 	plateau.cases[21][13] = Type_de_case.Eau;
 }
-
 
 /************************************************************/
 // Fonction principale

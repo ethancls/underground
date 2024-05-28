@@ -1,25 +1,84 @@
-/************************************************************/
-/**
- * Université Sorbonne Paris Nord, Programmation Web
- * Auteurs                       : Étienne André
- * Création                      : 2023/12/11
- * Dernière modification         : 2024/05/21
- */
-/************************************************************/
+body {
+    background-image: url('../images/background.jpeg');
+    background-size: cover;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+}
 
 h1 {
-	font-family	: monospace;
-	font-size	: 3em;
+    background: linear-gradient(135deg, rgba(142, 3, 242, 0.7), rgba(0, 106, 255, 0.7));
+    display: block;
+    border-radius: 15px;
+    font-size: 3em;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    width: 30%;
+    margin: 20px auto;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
 }
 
-#boutons input[type=image]
-{
-	height: 32px;
-	border: solid black 2px;
+#simulateur {
+    border: 2px solid #000;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: block;
+    margin: 20px auto;
 }
-#boutons input[type=image]:disabled
-{
-    opacity:0.5;
-	border: solid red 2px;
+
+#boutons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#boutons input[type=image] {
+    background-color: rgba(255, 255, 255, 0.8);
+    height: 32px;
+    border: solid black 2px;
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin: 5px;
+}
+
+#boutons input[type=image]:disabled {
+    background-color: gray;
+    border-radius: 10px;
+    opacity: 0.5;
+    border: solid red 2px;
+}
+
+#boutons input[type=image]:hover {
+    background-color: gray;
+    border-radius: 10px;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+#boutons input[type=button] {
+    background-color: orange;
+    border-radius: 10px;
+    height: 32px;
+    border: solid black 2px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin: 5px;
+    margin-left: 20px; /* Ajout de marge pour le décaler vers la droite */
+    align-self: center; /* Pour aligner verticalement avec les images */
+}
+
+#boutons input[type=button]:hover {
+    transform: scale(1.1);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+button {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
 }
 

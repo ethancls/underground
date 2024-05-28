@@ -11,15 +11,13 @@ h1 {
 	font-family	: monospace;
 	font-size	: 3em;
 }
-
-#boutons input[type=image]
-{
-	height: 32px;
-	border: solid black 2px;
+#boutons input[type=image] {
+    height: 32px;
+    border: solid black 2px;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-#boutons input[type=image]:disabled
-{
-    opacity:0.5;
-	border: solid red 2px;
+#boutons input[type=image]:disabled {
+    opacity: 0.5;
+    border: solid red 2px;
 }
 

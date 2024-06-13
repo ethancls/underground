@@ -79,7 +79,7 @@ const IMAGE_EXPLOSION = new Image();
 IMAGE_EXPLOSION.src = 'images/explosion.png';
 
 const IMAGE_BUILDING = new Image();
-IMAGE_BUILDING.src = 'images/building.png';
+IMAGE_BUILDING.src = null;
 
 const IMAGE_WAGON = new Image();
 IMAGE_WAGON.src = 'images/wagon.png';
@@ -159,7 +159,7 @@ class Loco {
 		}
 	}
 
-	avancer(contexte, plateau, type, position) {
+	avancer(plateau, type, position) {
 		let newX = position.x;
 		let newY = position.y;
 
@@ -179,8 +179,6 @@ class Loco {
 		}
 
 		if (this.peutAvancer(newX, newY, plateau, position)) {
-			dessine_train(contexte, type, newX, newY);
-			dessine_case(contexte, plateau, position.x, position.y);
 			position.x = newX;
 			position.y = newY;
 			this.miseAJourDirection(plateau, position);
@@ -193,20 +191,14 @@ class Loco {
 
 	avancerLoco(contexte, plateau) {
 		// Avance la locomotive
-		if (this.avancer(contexte, plateau, Type_de_case.Loco, this) === false) {
+		if (this.avancer(plateau, Type_de_case.Loco, this) === false) {
 			const index = locomotives.indexOf(this);
-			dessine_train(contexte, Type_de_case.Explosion, this.x, this.y);
-			//plateau.cases[this.x][this.y] = Type_de_case.Ruines;
 			setTimeout(() => {
-				dessine_case(contexte, plateau, this.x, this.y);
+				dessine_case_type(contexte, Type_de_case.Explosion, this.x, this.y);
 				for (let i = 0; i < this.longueur; i++) {
-					dessine_train(contexte, Type_de_case.Explosion, this.wagons[i].x, this.wagons[i].y);
-					//plateau.cases[this.wagons[i].x][this.wagons[i].y] = Type_de_case.Ruines;
-					setTimeout(() => { dessine_case(contexte, plateau, this.wagons[i].x, this.wagons[i].y); }, 500);
+					setTimeout(() => { dessine_case_type(contexte, Type_de_case.Explosion, this.wagons[i].x, this.wagons[i].y) }, 100);
 				}
-			}, 500);
-
-
+			}, 300);
 			if (index > -1) {
 				locomotives.splice(index, 1);
 			}
@@ -216,7 +208,7 @@ class Loco {
 
 		// Avance les wagons
 		for (let i = 0; i < this.longueur; i++) {
-			this.avancer(contexte, plateau, Type_de_case.Wagon, this.wagons[i]);
+			this.avancer(plateau, Type_de_case.Wagon, this.wagons[i]);
 		}
 	}
 
@@ -322,16 +314,23 @@ function image_of_case(type_de_case) {
 
 function dessine_case(contexte, plateau, x, y) {
 	const la_case = plateau.cases[x][y];
-
-	// NOTE: à améliorer
-
 	let image_a_afficher = image_of_case(la_case);
 	contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
 }
 
-function dessine_train(contexte, train, x, y) {
-	let image_a_afficher = image_of_case(train);
+function dessine_case_type(contexte, type, x, y) {
+	let image_a_afficher = image_of_case(type);
 	contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
+}
+
+function dessine_train(page) {
+	// Dessin des trains
+	locomotives.forEach(loco => {
+		dessine_case_type(page, Type_de_case.Loco, loco.x, loco.y);
+		for (let i = 0; i < loco.longueur; i++) {
+			dessine_case_type(page, Type_de_case.Wagon, loco.wagons[i].x, loco.wagons[i].y);
+		}
+	});
 }
 
 function dessine_plateau(page, plateau) {
@@ -347,6 +346,8 @@ function gameLoop(contexte, plateau) {
 
 	if (!pause) {
 		locomotives.forEach(loco => { loco.avancerLoco(contexte, plateau); });
+		dessine_plateau(contexte, plateau);
+		dessine_train(contexte);
 	}
 	setTimeout(gameLoop, 500, contexte, plateau);
 }
@@ -367,6 +368,31 @@ function setupListeners(contexte, plateau) {
 			selectedType = button.id;
 		});
 	});
+
+	document.getElementById('simulateur').addEventListener('mousemove', (event) => {
+		dessine_plateau(contexte, plateau);
+		dessine_train(contexte);
+		let rect = event.target.getBoundingClientRect();
+		let x = Math.floor((event.clientX - rect.left) / LARGEUR_CASE) * LARGEUR_CASE;
+		let y = Math.floor((event.clientY - rect.top) / HAUTEUR_CASE) * HAUTEUR_CASE;
+		contexte.fillStyle = 'orange';
+		contexte.fillRect(x, y, LARGEUR_CASE, HAUTEUR_CASE);
+	});
+
+	let isMoving = false;
+	let x = 0, y = 0;
+
+	document.addEventListener("mousedown", (event) => {
+		y = event.offsetY;
+		x = event.offsetX;
+		isMoving = true;
+	});
+
+	document.addEventListener("mouseup", (event) => {
+		y = event.offsetY;
+		x = event.offsetX;
+		isMoving = false;
+	})
 
 	document.getElementById('simulateur').addEventListener('click', (event) => {
 		let rect = event.target.getBoundingClientRect();
@@ -407,66 +433,120 @@ function setupListeners(contexte, plateau) {
 					dessine_case(contexte, plateau, x, y);
 					break;
 				case 'bouton_train_1':
-					if (plateau.cases[x][y] == Type_de_case.Rail_horizontal) {
-						dessine_train(contexte, Type_de_case.Loco, x, y);
+					if (isTrackValid(x, y, 1)) {
+						locomotives.push(new Loco(x, y, DIRECTION.DROITE, 0));
+						dessine_train(contexte);
 					}
-					locomotives.push(new Loco(x, y, DIRECTION.DROITE, 0));
 					break;
 				case 'bouton_train_2':
-					for (let i = 0; i < 2; i++) {
-						if (x - i > 0) {
-							if (plateau.cases[x - i][y] != Type_de_case.Rail_horizontal) {
-								return;
-							}
-						}
-						else {
-							return;
-						}
+					if (isTrackValid(x, y, 2)) {
+						locomotives.push(new Loco(x, y, DIRECTION.DROITE, 1));
+						dessine_train(contexte);
 					}
-					dessine_train(contexte, Type_de_case.Loco, x, y);
-					for (let i = 1; i < 2; i++) {
-						dessine_train(contexte, Type_de_case.Wagon, x - i, y);
-					}
-					locomotives.push(new Loco(x, y, DIRECTION.DROITE, 1));
 					break;
 				case 'bouton_train_4':
-					for (let i = 0; i < 4; i++) {
-						if (x - i > 0) {
-							if (plateau.cases[x - i][y] != Type_de_case.Rail_horizontal) {
-								return;
-							}
-						}
-						else {
-							return;
-
-						}
+					if (isTrackValid(x, y, 4)) {
+						locomotives.push(new Loco(x, y, DIRECTION.DROITE, 3));
+						dessine_train(contexte);
 					}
-					dessine_train(contexte, Type_de_case.Loco, x, y);
-					for (let i = 1; i < 4; i++) {
-						dessine_train(contexte, Type_de_case.Wagon, x - i, y);
-					}
-					locomotives.push(new Loco(x, y, DIRECTION.DROITE, 3));
 					break;
 				case 'bouton_train_6':
-					for (let i = 0; i < 6; i++) {
-						if (x - i > 0) {
-							if (plateau.cases[x - i][y] != Type_de_case.Rail_horizontal) {
-								return;
-							}
-						}
-						else {
-							return;
-						}
+					if (isTrackValid(x, y, 6)) {
+						locomotives.push(new Loco(x, y, DIRECTION.DROITE, 5));
+						dessine_train(contexte);
 					}
-					dessine_train(contexte, Type_de_case.Loco, x, y);
-					for (let i = 1; i < 6; i++) {
-						dessine_train(contexte, Type_de_case.Wagon, x - i, y);
-					}
-					locomotives.push(new Loco(x, y, DIRECTION.DROITE, 5));
 					break;
 			}
 		}
 	});
+
+	document.getElementById('simulateur').addEventListener('mousemove', handleMouseMove);
+
+	function handleMouseMove(event) {
+		if (isMoving) {
+			let rect = event.target.getBoundingClientRect();
+			let x = Math.floor((event.clientX - rect.left) / LARGEUR_CASE);
+			let y = Math.floor((event.clientY - rect.top) / HAUTEUR_CASE);
+			if (selectedType && x < LARGEUR_PLATEAU && y < HAUTEUR_PLATEAU) {
+				switch (selectedType) {
+					case 'bouton_eau':
+						plateau.cases[x][y] = Type_de_case.Eau;
+						dessine_case(contexte, plateau, x, y);
+						break;
+					case 'bouton_foret':
+						plateau.cases[x][y] = Type_de_case.Foret;
+						dessine_case(contexte, plateau, x, y);
+						break;
+					case 'bouton_rail_horizontal':
+						plateau.cases[x][y] = Type_de_case.Rail_horizontal;
+						dessine_case(contexte, plateau, x, y);
+						break;
+					case 'bouton_rail_vertical':
+						plateau.cases[x][y] = Type_de_case.Rail_vertical;
+						dessine_case(contexte, plateau, x, y);
+						break;
+					case 'bouton_rail_droite_vers_haut':
+						plateau.cases[x][y] = Type_de_case.Rail_droite_vers_haut;
+						dessine_case(contexte, plateau, x, y);
+						break;
+					case 'bouton_rail_haut_vers_droite':
+						plateau.cases[x][y] = Type_de_case.Rail_haut_vers_droite;
+						dessine_case(contexte, plateau, x, y);
+						break;
+					case 'bouton_rail_droite_vers_bas':
+						plateau.cases[x][y] = Type_de_case.Rail_droite_vers_bas;
+						dessine_case(contexte, plateau, x, y);
+						break;
+					case 'bouton_rail_bas_vers_droite':
+						plateau.cases[x][y] = Type_de_case.Rail_bas_vers_droite;
+						dessine_case(contexte, plateau, x, y);
+						break;
+					case 'bouton_train_1':
+						if (isTrackValid(x, y, 1)) {
+							locomotives.push(new Loco(x, y, DIRECTION.DROITE, 0));
+							dessine_train(contexte);
+						}
+						break;
+					case 'bouton_train_2':
+						if (isTrackValid(x, y, 2)) {
+							locomotives.push(new Loco(x, y, DIRECTION.DROITE, 1));
+							dessine_train(contexte);
+						}
+						break;
+					case 'bouton_train_4':
+						if (isTrackValid(x, y, 4)) {
+							locomotives.push(new Loco(x, y, DIRECTION.DROITE, 3));
+							dessine_train(contexte);
+						}
+						break;
+					case 'bouton_train_6':
+						if (isTrackValid(x, y, 6)) {
+							locomotives.push(new Loco(x, y, DIRECTION.DROITE, 5));
+							dessine_train(contexte);
+						}
+						break;
+				}
+			}
+		}
+	}
+
+	function isTrackValid(x, y, length) {
+		for (let i = 0; i < length; i++) {
+			if (x - i < 0 || plateau.cases[x - i][y] !== Type_de_case.Rail_horizontal || case_occupee(x - i, y)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	function case_occupee(x, y) {
+		return locomotives.find(loco => {
+			if (loco.x === x && loco.y === y) {
+				return true;
+			}
+			return loco.wagons.find(wagon => wagon.x === x && wagon.y === y);
+		});
+	}
 
 	document.getElementById('bouton_pause').addEventListener('click', () => {
 		pause = !pause;
@@ -479,7 +559,6 @@ function setupListeners(contexte, plateau) {
 /************************************************************/
 
 
-// NOTE : ne pas modifier le plateau initial
 function cree_plateau_initial(plateau) {
 	// Circuit
 	plateau.cases[12][7] = Type_de_case.Rail_horizontal;

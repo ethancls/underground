@@ -58,6 +58,12 @@ class Type_de_case {
 
 	static Explosion = new Type_de_case('explosion');
 
+	static Bateau = new Type_de_case('bateau');
+
+	static Avion = new Type_de_case('avion');
+
+	static Undertale = new Type_de_case('undertale');
+
 	constructor(nom) {
 		this.nom = nom;
 	}
@@ -102,6 +108,15 @@ IMAGE_RAIL_DROITE_VERS_HAUT.src = 'images/rail-droite-vers-haut.png';
 const IMAGE_RAIL_HAUT_VERS_DROITE = new Image();
 IMAGE_RAIL_HAUT_VERS_DROITE.src = 'images/rail-haut-vers-droite.png';
 
+const IMAGE_BATEAU = new Image();
+IMAGE_BATEAU.src = 'images/bateau.png';
+
+const IMAGE_AVION = new Image();
+IMAGE_AVION.src = 'images/avion.png';
+
+const IMAGE_UNDERTALE = new Image();
+IMAGE_UNDERTALE.src = 'images/undertale.png';
+
 
 /************************************************************/
 // Variables globales
@@ -109,6 +124,8 @@ IMAGE_RAIL_HAUT_VERS_DROITE.src = 'images/rail-haut-vers-droite.png';
 
 let pause = false;
 let locomotives = [];
+let bateau = [];
+let avion = [];
 
 /************************************************************/
 /* Classes */
@@ -198,7 +215,7 @@ class Loco {
 				for (let i = 0; i < this.longueur; i++) {
 					setTimeout(() => { dessine_case_type(contexte, Type_de_case.Explosion, this.wagons[i].x, this.wagons[i].y) }, 100);
 				}
-			}, 300);
+			}, 10);
 			if (index > -1) {
 				locomotives.splice(index, 1);
 			}
@@ -212,8 +229,17 @@ class Loco {
 		}
 	}
 
+	case_occupee(x, y) {
+		return locomotives.find(loco => {
+			if (loco.x === x && loco.y === y) {
+				return true;
+			}
+			return loco.wagons.find(wagon => wagon.x === x && wagon.y === y);
+		});
+	}
+
 	peutAvancer(x, y, plateau, position) {
-		if (x < 0 || x >= plateau.largeur || y < 0 || y >= plateau.hauteur) {
+		if (x < 0 || x >= plateau.largeur || y < 0 || y >= plateau.hauteur || this.case_occupee(x, y)) {
 			return false;
 		}
 
@@ -291,6 +317,180 @@ class Loco {
 	}
 }
 
+
+/*------------------------------------------------------------*/
+// Autres vehicules
+/*------------------------------------------------------------*/
+
+class Bateau {
+	constructor(x, y, direction) {
+		this.x = x;
+		this.y = y;
+		this.direction = direction;
+	}
+
+	avancer(plateau, type, position) {
+		let newX = this.x;
+		let newY = this.y;
+
+		switch (position.direction) {
+			case DIRECTION.DROITE:
+				newX++;
+				break;
+			case DIRECTION.GAUCHE:
+				newX--;
+				break;
+			case DIRECTION.HAUT:
+				newY--;
+				break;
+			case DIRECTION.BAS:
+				newY++;
+				break;
+		}
+
+		if (this.peutAvancer(newX, newY, plateau, position)) {
+			this.x = newX;
+			this.y = newY;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	peutAvancer(x, y, plateau, position) {
+		if (x < 0 || x >= plateau.largeur || y < 0 || y >= plateau.hauteur) {
+			return false;
+		}
+
+		const caseSuivante = plateau.cases[x][y];
+		switch (this.direction) {
+			case DIRECTION.DROITE:
+				if (caseSuivante === Type_de_case.Eau) {
+					return true;
+				}
+				else {
+					this.changerDirection();
+				}
+				break;
+			case DIRECTION.GAUCHE:
+				if (caseSuivante === Type_de_case.Eau) {
+					return true;
+				} else {
+					this.changerDirection();
+				}
+				break;
+			case DIRECTION.HAUT:
+				if (caseSuivante === Type_de_case.Eau) {
+					return true;
+				} else {
+					this.changerDirection();
+				}
+				break;
+			case DIRECTION.BAS:
+				if (caseSuivante === Type_de_case.Eau) {
+					return true;
+				} else {
+					this.changerDirection();
+				}
+				break;
+		}
+
+		return false;
+	}
+
+	changerDirection() {
+		const directions = [DIRECTION.DROITE, DIRECTION.GAUCHE, DIRECTION.HAUT, DIRECTION.BAS];
+		this.direction = directions[Math.floor(Math.random() * directions.length)];
+	}
+}
+
+class Avion {
+	constructor(x, y, direction) {
+		this.x = x;
+		this.y = y;
+		this.direction = direction;
+	}
+
+	avancer(plateau, type, position, contexte) {
+		let newX = this.x;
+		let newY = this.y;
+
+		switch (position.direction) {
+			case DIRECTION.DROITE:
+				newX++;
+				newY++;
+				break;
+			case DIRECTION.GAUCHE:
+				newX--;
+				newY--;
+				break;
+			case DIRECTION.HAUT:
+				newY--;
+				newX++;
+				break;
+			case DIRECTION.BAS:
+				newY++;
+				newX--;
+				break;
+		}
+
+		if (this.peutAvancer(newX, newY, plateau, position, contexte)) {
+			this.x = newX;
+			this.y = newY;
+			return true;
+		}
+		else {
+			avion.splice(avion.indexOf(this), 1);
+			return false;
+		}
+	}
+
+	peutAvancer(x, y, plateau, position, contexte) {
+		if (x < 0 || x >= plateau.largeur || y < 0 || y >= plateau.hauteur) {
+			return false;
+		}
+
+		if (avion.find(avion => Math.floor(avion.x) === x && Math.floor(avion.y) === y)) {
+			setTimeout(() => { dessine_case_type(contexte, Type_de_case.Explosion, this.x, this.y); }, 100);
+			return false;
+		}
+		return true;
+	}
+}
+
+class Undertale {
+	constructor(x, y, direction) {
+		this.x = x;
+		this.y = y;
+		this.direction = direction;
+	}
+
+	avancer(plateau, type, position) {
+		let newX = this.x;
+		let newY = this.y;
+
+		switch (position.direction) {
+
+			case DIRECTION.DROITE:
+				newX++;
+				break;
+
+			case DIRECTION.GAUCHE:
+				newX--;
+				break;
+
+			case DIRECTION.HAUT:
+				newY--;
+				break;
+			
+			case DIRECTION.BAS:
+				newY++;
+				break;
+		}
+	}}
+
+
 /************************************************************/
 // Fonctions
 /************************************************************/
@@ -309,6 +509,9 @@ function image_of_case(type_de_case) {
 		case Type_de_case.Loco: return IMAGE_LOCO;
 		case Type_de_case.Building: return IMAGE_BUILDING;
 		case Type_de_case.Explosion: return IMAGE_EXPLOSION;
+		case Type_de_case.Bateau: return IMAGE_BATEAU;
+		case Type_de_case.Avion: return IMAGE_AVION;
+		case Type_de_case.Undertale: return IMAGE_UNDERTALE;
 	}
 }
 
@@ -321,6 +524,40 @@ function dessine_case(contexte, plateau, x, y) {
 function dessine_case_type(contexte, type, x, y) {
 	let image_a_afficher = image_of_case(type);
 	contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
+}
+
+function dessine_avion(contexte) {
+	// Dessin des avions
+	avion.forEach(avion => {
+		let image_a_afficher = image_of_case(Type_de_case.Avion);
+		let angle = 0;
+		switch (avion.direction) {
+			case DIRECTION.DROITE:
+				angle = Math.PI / 2;
+				break;
+			case DIRECTION.GAUCHE:
+				angle = -Math.PI / 2;
+				break;
+			case DIRECTION.HAUT:
+				angle = 0;
+				break;
+			case DIRECTION.BAS:
+				angle = -Math.PI;
+				break;
+		}
+		contexte.save();
+		contexte.translate(avion.x * LARGEUR_CASE + LARGEUR_CASE / 2, avion.y * HAUTEUR_CASE + HAUTEUR_CASE / 2);
+		contexte.rotate(angle);
+		contexte.drawImage(image_a_afficher, -LARGEUR_CASE / 2, -HAUTEUR_CASE / 2, LARGEUR_CASE, HAUTEUR_CASE);
+		contexte.restore();
+	});
+}
+
+function dessine_bateau(page) {
+	// Dessin des bateaux
+	bateau.forEach(bateau => {
+		dessine_case_type(page, Type_de_case.Bateau, bateau.x, bateau.y);
+	});
 }
 
 function dessine_train(page) {
@@ -346,10 +583,100 @@ function gameLoop(contexte, plateau) {
 
 	if (!pause) {
 		locomotives.forEach(loco => { loco.avancerLoco(contexte, plateau); });
+		bateau.forEach(bateau => { bateau.avancer(plateau, Type_de_case.Bateau, bateau); });
+		avion.forEach(avion => { avion.avancer(plateau, Type_de_case.Avion, avion, contexte); });
 		dessine_plateau(contexte, plateau);
 		dessine_train(contexte);
+		dessine_bateau(contexte);
+		dessine_avion(contexte);
 	}
 	setTimeout(gameLoop, 500, contexte, plateau);
+}
+
+function updateListeCartes() {
+	const listeCartes = document.getElementById('liste_cartes');
+	listeCartes.innerHTML = ''; // Clear existing options
+	for (let i = 0; i < localStorage.length; i++) {
+		const key = localStorage.key(i);
+		const option = document.createElement('option');
+		option.value = key;
+		option.text = key;
+		listeCartes.appendChild(option);
+	}
+}
+
+function typeToString(type) {
+	switch (type) {
+		case Type_de_case.Foret:
+			return 'Foret';
+		case Type_de_case.Eau:
+			return 'Eau';
+		case Type_de_case.Rail_horizontal:
+			return 'Rail_horizontal';
+		case Type_de_case.Rail_vertical:
+			return 'Rail_vertical';
+		case Type_de_case.Rail_droite_vers_haut:
+			return 'Rail_droite_vers_haut';
+		case Type_de_case.Rail_haut_vers_droite:
+			return 'Rail_haut_vers_droite';
+		case Type_de_case.Rail_droite_vers_basb:
+			return 'Rail_droite_vers_bas';
+		case Type_de_case.Rail_bas_vers_droite:
+			return 'Rail_bas_vers_droite';
+		case Type_de_case.Wagon:
+			return 'Wagon';
+		case Type_de_case.Loco:
+			return 'Loco';
+		case Type_de_case.Building:
+			return 'Building';
+		case Type_de_case.Explosion:
+			return 'Explosion';
+		case Type_de_case.Bateau:
+			return 'Bateau';
+		case Type_de_case.Avion:
+			return 'Avion';
+		case Type_de_case.Undertale:
+			return 'Undertale';
+		default:
+			return null;
+	}
+}
+
+function stringToType(str) {
+	switch (str) {
+		case 'Foret':
+			return Type_de_case.Foret;
+		case 'Eau':
+			return Type_de_case.Eau;
+		case 'Rail_horizontal':
+			return Type_de_case.Rail_horizontal;
+		case 'Rail_vertical':
+			return Type_de_case.Rail_vertical;
+		case 'Rail_droite_vers_haut':
+			return Type_de_case.Rail_droite_vers_haut;
+		case 'Rail_haut_vers_droite':
+			return Type_de_case.Rail_haut_vers_droite;
+		case 'Rail_droite_vers_bas':
+			return Type_de_case.Rail_droite_vers_bas;
+		case 'Rail_bas_vers_droite':
+			return Type_de_case.Rail_bas_vers_droite;
+		case 'Wagon':
+			return Type_de_case.Wagon;
+		case 'Loco':
+			return Type_de_case.Loco;
+		case 'Building':
+			return Type_de_case.Building;
+		case 'Explosion':
+			return Type_de_case.Explosion;
+		case 'Bateau':
+			return Type_de_case.Bateau;
+		case 'Avion':
+			return Type_de_case.Avion;
+		case 'Undertale':
+			return Type_de_case.Undertale;
+		default:
+			return null;
+	}
 }
 
 
@@ -372,6 +699,8 @@ function setupListeners(contexte, plateau) {
 	document.getElementById('simulateur').addEventListener('mousemove', (event) => {
 		dessine_plateau(contexte, plateau);
 		dessine_train(contexte);
+		dessine_bateau(contexte);
+		dessine_avion(contexte);
 		let rect = event.target.getBoundingClientRect();
 		let x = Math.floor((event.clientX - rect.left) / LARGEUR_CASE) * LARGEUR_CASE;
 		let y = Math.floor((event.clientY - rect.top) / HAUTEUR_CASE) * HAUTEUR_CASE;
@@ -456,6 +785,16 @@ function setupListeners(contexte, plateau) {
 						dessine_train(contexte);
 					}
 					break;
+				case 'bouton_bateau':
+					if (plateau.cases[x][y] === Type_de_case.Eau) {
+						const directions = [DIRECTION.DROITE, DIRECTION.GAUCHE, DIRECTION.HAUT, DIRECTION.BAS];
+						bateau.push(new Bateau(x, y, directions[Math.floor(Math.random() * directions.length)]));
+					}
+					break;
+				case 'bouton_avion':
+					const directions = [DIRECTION.DROITE, DIRECTION.GAUCHE, DIRECTION.HAUT, DIRECTION.BAS];
+					avion.push(new Avion(x, y, directions[Math.floor(Math.random() * directions.length)]));
+					break;
 			}
 		}
 	});
@@ -525,6 +864,16 @@ function setupListeners(contexte, plateau) {
 							dessine_train(contexte);
 						}
 						break;
+					case 'bouton_bateau':
+						if (plateau.cases[x][y] === Type_de_case.Eau) {
+							const directions = [DIRECTION.DROITE, DIRECTION.GAUCHE, DIRECTION.HAUT, DIRECTION.BAS];
+							bateau.push(new Bateau(x, y, directions[Math.floor(Math.random() * directions.length)]));
+						}
+						break;
+					case 'bouton_avion':
+						const directions = [DIRECTION.DROITE, DIRECTION.GAUCHE, DIRECTION.HAUT, DIRECTION.BAS];
+						avion.push(new Avion(x, y, directions[Math.floor(Math.random() * directions.length)]));
+						break;
 				}
 			}
 		}
@@ -552,6 +901,39 @@ function setupListeners(contexte, plateau) {
 		pause = !pause;
 		document.getElementById('bouton_pause').value = pause ? 'Redémarrer' : 'Pause';
 	});
+
+	document.getElementById('sauvegarder_carte').addEventListener('click', () => {
+		const nomCarte = document.getElementById('nom_carte').value;
+		if (nomCarte) {
+			const mapData = plateau.cases.map(col => col.map(caseType => typeToString(caseType)));
+			localStorage.setItem(nomCarte, JSON.stringify(mapData));
+			alert('Carte sauvegardée avec succès !');
+			updateListeCartes();
+		} else {
+			alert('Veuillez entrer un nom pour la carte.');
+		}
+	});
+
+	document.getElementById('charger_carte').addEventListener('click', () => {
+		const listeCartes = document.getElementById('liste_cartes');
+		const nomCarte = listeCartes.options[listeCartes.selectedIndex].value;
+		const savedMapData = localStorage.getItem(nomCarte);
+		if (savedMapData) {
+			const mapData = JSON.parse(savedMapData);
+			plateau.cases.forEach((col, x) => {
+				col.forEach((_, y) => {
+					plateau.cases[x][y] = stringToType(mapData[x][y]);
+				});
+			});
+			dessine_plateau(contexte, plateau);
+			locomotives = [];
+			bateau = [];
+			avion = [];
+			alert('Carte chargée avec succès !');
+		} else {
+			alert('Aucune carte sauvegardée trouvée.');
+		}
+	});
 }
 
 /************************************************************/
@@ -560,141 +942,7 @@ function setupListeners(contexte, plateau) {
 
 
 function cree_plateau_initial(plateau) {
-	// Circuit
-	plateau.cases[12][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[13][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[14][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[15][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[16][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[17][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[18][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[19][7] = Type_de_case.Rail_droite_vers_haut;
-	plateau.cases[19][6] = Type_de_case.Rail_vertical;
-	plateau.cases[19][5] = Type_de_case.Rail_droite_vers_bas;
-	plateau.cases[12][5] = Type_de_case.Rail_horizontal;
-	plateau.cases[13][5] = Type_de_case.Rail_horizontal;
-	plateau.cases[14][5] = Type_de_case.Rail_horizontal;
-	plateau.cases[15][5] = Type_de_case.Rail_horizontal;
-	plateau.cases[16][5] = Type_de_case.Rail_horizontal;
-	plateau.cases[17][5] = Type_de_case.Rail_horizontal;
-	plateau.cases[18][5] = Type_de_case.Rail_horizontal;
-	plateau.cases[11][5] = Type_de_case.Rail_haut_vers_droite;
-	plateau.cases[11][6] = Type_de_case.Rail_vertical;
-	plateau.cases[11][7] = Type_de_case.Rail_bas_vers_droite;
 
-	// Ciruit 2
-	plateau.cases[10][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[11][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[12][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[13][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[14][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[15][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[16][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[17][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[18][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[19][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[20][9] = Type_de_case.Rail_horizontal;
-	plateau.cases[21][9] = Type_de_case.Rail_droite_vers_haut;
-	plateau.cases[21][8] = Type_de_case.Rail_vertical;
-	plateau.cases[21][7] = Type_de_case.Rail_vertical;
-	plateau.cases[21][6] = Type_de_case.Rail_vertical;
-	plateau.cases[21][5] = Type_de_case.Rail_vertical;
-	plateau.cases[21][4] = Type_de_case.Rail_vertical;
-	plateau.cases[21][3] = Type_de_case.Rail_droite_vers_bas;
-	plateau.cases[10][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[11][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[12][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[13][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[14][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[15][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[16][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[17][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[18][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[19][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[20][3] = Type_de_case.Rail_horizontal;
-	plateau.cases[9][9] = Type_de_case.Rail_bas_vers_droite;
-	plateau.cases[9][8] = Type_de_case.Rail_vertical;
-	plateau.cases[9][7] = Type_de_case.Rail_vertical;
-	plateau.cases[9][6] = Type_de_case.Rail_vertical;
-	plateau.cases[9][5] = Type_de_case.Rail_vertical;
-	plateau.cases[9][4] = Type_de_case.Rail_vertical;
-	plateau.cases[9][3] = Type_de_case.Rail_haut_vers_droite;
-
-	// Segment isolé à gauche
-	plateau.cases[0][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[1][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[2][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[3][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[4][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[5][7] = Type_de_case.Eau;
-	plateau.cases[6][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[7][7] = Type_de_case.Rail_horizontal;
-
-	// Plan d'eau
-	for (let x = 22; x <= 27; x++) {
-		for (let y = 2; y <= 5; y++) {
-			plateau.cases[x][y] = Type_de_case.Eau;
-		}
-	}
-
-	// Segment isolé à droite
-	plateau.cases[22][8] = Type_de_case.Rail_horizontal;
-	plateau.cases[23][8] = Type_de_case.Rail_horizontal;
-	plateau.cases[24][8] = Type_de_case.Rail_horizontal;
-	plateau.cases[25][8] = Type_de_case.Rail_horizontal;
-	plateau.cases[26][8] = Type_de_case.Rail_bas_vers_droite;
-	plateau.cases[27][8] = Type_de_case.Rail_horizontal;
-	plateau.cases[28][8] = Type_de_case.Rail_horizontal;
-	plateau.cases[29][8] = Type_de_case.Rail_horizontal;
-
-	// TCHOU
-	plateau.cases[3][10] = Type_de_case.Eau;
-	plateau.cases[4][10] = Type_de_case.Eau;
-	plateau.cases[4][11] = Type_de_case.Eau;
-	plateau.cases[4][12] = Type_de_case.Eau;
-	plateau.cases[4][13] = Type_de_case.Eau;
-	plateau.cases[4][13] = Type_de_case.Eau;
-	plateau.cases[5][10] = Type_de_case.Eau;
-
-	plateau.cases[7][10] = Type_de_case.Eau;
-	plateau.cases[7][11] = Type_de_case.Eau;
-	plateau.cases[7][12] = Type_de_case.Eau;
-	plateau.cases[7][13] = Type_de_case.Eau;
-	plateau.cases[8][10] = Type_de_case.Eau;
-	plateau.cases[9][10] = Type_de_case.Eau;
-	plateau.cases[8][13] = Type_de_case.Eau;
-	plateau.cases[9][13] = Type_de_case.Eau;
-
-	plateau.cases[11][10] = Type_de_case.Eau;
-	plateau.cases[11][11] = Type_de_case.Eau;
-	plateau.cases[11][12] = Type_de_case.Eau;
-	plateau.cases[11][13] = Type_de_case.Eau;
-	plateau.cases[12][11] = Type_de_case.Eau;
-	plateau.cases[13][10] = Type_de_case.Eau;
-	plateau.cases[13][11] = Type_de_case.Eau;
-	plateau.cases[13][12] = Type_de_case.Eau;
-	plateau.cases[13][13] = Type_de_case.Eau;
-
-	plateau.cases[15][10] = Type_de_case.Eau;
-	plateau.cases[15][11] = Type_de_case.Eau;
-	plateau.cases[15][12] = Type_de_case.Eau;
-	plateau.cases[15][13] = Type_de_case.Eau;
-	plateau.cases[16][10] = Type_de_case.Eau;
-	plateau.cases[16][13] = Type_de_case.Eau;
-	plateau.cases[17][10] = Type_de_case.Eau;
-	plateau.cases[17][11] = Type_de_case.Eau;
-	plateau.cases[17][12] = Type_de_case.Eau;
-	plateau.cases[17][13] = Type_de_case.Eau;
-
-	plateau.cases[19][10] = Type_de_case.Eau;
-	plateau.cases[19][11] = Type_de_case.Eau;
-	plateau.cases[19][12] = Type_de_case.Eau;
-	plateau.cases[19][13] = Type_de_case.Eau;
-	plateau.cases[20][13] = Type_de_case.Eau;
-	plateau.cases[21][10] = Type_de_case.Eau;
-	plateau.cases[21][11] = Type_de_case.Eau;
-	plateau.cases[21][12] = Type_de_case.Eau;
-	plateau.cases[21][13] = Type_de_case.Eau;
 }
 
 /************************************************************/
@@ -722,6 +970,9 @@ function tchou() {
 
 	// Boucle de jeu
 	gameLoop(contexte, plateau);
+
+	// Mise à jour de la liste des cartes
+	updateListeCartes();
 
 }
 

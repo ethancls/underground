@@ -6,4 +6,4 @@ Pas de bug notoire, tout est implémenté.
 
 ## Seconde Partie
 
-Une vue isométrique
+On a changé les couleurs, les explosions, une plus grande map

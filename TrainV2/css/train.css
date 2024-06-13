@@ -5,18 +5,61 @@ body {
     margin: 0;
 }
 
+#controls {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    justify-content: center;
+}
+
+#controls input[type=text],
+#controls select {
+    background-color: rgba(255, 255, 120, 0.8);
+    padding: 5px;
+    border-radius: 5px;
+    border: 2px solid #000;
+    font-size: 1em;
+    width: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#controls button {
+    background-color: orange;
+    text-align: center;
+    border-radius: 10px;
+    height: 32px;
+    border: solid black 2px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin: 5px;
+    margin-left: 20px;
+    align-self: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#controls button:hover {
+    transform: scale(1.1);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
 h1 {
     background: linear-gradient(135deg, rgba(142, 3, 242, 0.7), rgba(0, 106, 255, 0.7));
-    display: block;
     border-radius: 15px;
-    font-size: 3em;
+    font-size: 2em; /* Adjust the font size */
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     padding: 10px;
-    width: 30%;
-    margin: 20px auto;
-    text-align: center;
+    margin: 0 50px 0 50px; /* Adjust margins as needed */
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
 }
 
 #simulateur {
@@ -86,4 +129,5 @@ button {
     font-size: 16px;
     cursor: pointer;
 }
+
 

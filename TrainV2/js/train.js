@@ -1,9 +1,9 @@
 /************************************************************/
 /**
  * Université Sorbonne Paris Nord, Programmation Web
- * Auteurs                       : Ethan Nicolas && 
+ * Auteurs                       : Ethan Nicolas && Homsi Rami
  * Création                      : 2023/12/11
- * Dernière modification         : 2024/04/27
+ * Dernière modification         : 2024/06/11
  */
 /************************************************************/
 
